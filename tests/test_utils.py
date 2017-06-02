@@ -6,7 +6,7 @@ class TestUtils(unittest.TestCase):
         X_train, X_test = utils.make_regression_data()
         train_cols = X_train.columns
         test_cols = X_test.columns
-        self.assertEquals(len(train_cols), len(test_cols)+1)
+        self.assertEqual(len(train_cols), len(test_cols)+1)
 
 class TestXYSplit(unittest.TestCase):
     pass
