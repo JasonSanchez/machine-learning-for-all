@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
+<!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
+
+<style>
+body {
+  font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
+
+/*styling for tooltip*/
+#tooltip {
+      position: absolute;
+      width: 200px;
+      height: auto;
+      padding: 10px;
+      background-color: white;
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      border-radius: 10px;
+      -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+#tooltip.hidden {
+        display: none;
+      }
+#tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 12px;
+        line-height: 14px;
+      }
+#filter2.hidden {
+  visibility: hidden;
+}
+#filter {
+  margin-right: 50px;
+}
+/* Styling for line*/
+.line {
+    stroke: steelblue;
+    stroke-width: 5;
+    fill: none;
+}
+
+/* Styling for line*/
+.line2 {
+    stroke: steelblue;
+    stroke-width: 5;
+    fill: none;
+}
+
+.line3 {
+    stroke: steelblue;
+    stroke-width: 5;
+    fill: none;
+}
+
+</style>
+<body>
+<form align="center">
+  <label id="filter">
+      <strong>News source:</strong>
+
+      <select id="news-sources" name="news-sources">
+          <option value="All">All</option>
+          <option value="ap.org">ap.org</option>
+          <option value="bloomberg.com">bloomberg.com</option>
+          <option value="breitbart.com">breitbart.com</option>
+          <option value="cadillacnews.com">cadillacnews.com</option>
+          <option value="cbsnews.com">cbsnews.com</option>
+          <option value="chicagotribune.com">chicagotribune.com</option>
+          <option value="cnn.com">cnn.com</option>
+          <option value="democraticunderground.com">democraticunderground.com</option>
+          <option value="foxnews.com">foxnews.com</option>
+          <option value="freerepublic.com">freerepublic.com</option>
+          <option value="gazette.com">gazette.com</option>
+          <option value="huffingtonpost.com">huffingtonpost.com</option>
+          <option value="msn.com">msn.com</option>
+          <option value="msnbc.com">msnbc.com</option>
+          <option value="mysanantonio.com">mysanantonio.com</option>
+          <option value="newsmax.com">newsmax.com</option>
+          <option value="patch.com">patch.com</option>
+          <option value="reuters.com">reuters.com</option>
+          <option value="srnnews.com">srnnews.com</option>
+          <option value="tbo.com">tbo.com</option>
+          <option value="thehill.com">thehill.com</option>
+          <option value="theweek.com">theweek.com</option>
+          <option value="time.com">time.com</option>
+          <option value="townhall.com">townhall.com</option>
+          <option value="washingtonpost.com">washingtonpost.com</option>
+          <option value="washingtontimes.com">washingtontimes.com</option>
+          <option value="wsj.com">wsj.com</option>
+          <option value="yahoo.com">yahoo.com</option>
+      </select>
+    </label>
+  <label id="filter2" class="hidden">
+      <strong>2nd News source:</strong>
+
+      <select id="news-sources2" name="news-sources2">
+          <option value="None" selected="selected">None</option>
+          <option value="ap.org">ap.org</option>
+          <option value="bloomberg.com">bloomberg.com</option>
+          <option value="breitbart.com">breitbart.com</option>
+          <option value="cadillacnews.com">cadillacnews.com</option>
+          <option value="cbsnews.com">cbsnews.com</option>
+          <option value="chicagotribune.com">chicagotribune.com</option>
+          <option value="cnn.com">cnn.com</option>
+          <option value="democraticunderground.com">democraticunderground.com</option>
+          <option value="foxnews.com">foxnews.com</option>
+          <option value="freerepublic.com">freerepublic.com</option>
+          <option value="gazette.com">gazette.com</option>
+          <option value="huffingtonpost.com">huffingtonpost.com</option>
+          <option value="msn.com">msn.com</option>
+          <option value="msnbc.com">msnbc.com</option>
+          <option value="mysanantonio.com">mysanantonio.com</option>
+          <option value="newsmax.com">newsmax.com</option>
+          <option value="patch.com">patch.com</option>
+          <option value="reuters.com">reuters.com</option>
+          <option value="srnnews.com">srnnews.com</option>
+          <option value="tbo.com">tbo.com</option>
+          <option value="thehill.com">thehill.com</option>
+          <option value="theweek.com">theweek.com</option>
+          <option value="time.com">time.com</option>
+          <option value="townhall.com">townhall.com</option>
+          <option value="washingtonpost.com">washingtonpost.com</option>
+          <option value="washingtontimes.com">washingtontimes.com</option>
+          <option value="wsj.com">wsj.com</option>
+          <option value="yahoo.com">yahoo.com</option>
+      </select>
+    </label>
+    <br><br>
+    <div id="check_filter">
+      <b>Candidates: </b>
+      <input type="checkbox" name="candidate" id="Trump_check" value="Trump" checked>Trump
+      <input type="checkbox" name="candidate" id="Clinton_check" value="Clinton" checked>Clinton
+    <br><br>
+    </div>
+
+    <div id="check_filter2">
+      <b>Average Trend Line: </b>
+      <input type="checkbox" name="Average_Trend" value="Line" checked> Enabled
+    <br><br>
+    </div>
+  </form>
+
+  <!-- tooltip for when hovering over bars -->
+  <div id="tooltip" class="hidden">
+        <p><strong><span id="node_candidate">NAME</span></strong></p>
+        <p><span id="node_date">date</span></p>
+        <p>Sentiment: <span id="node_sentiment">score</span></p>
+        <p><em><span id="node_source">source</span></em></p>
+        <p># of Articles: <span id="node_count">count</span></p>
+  </div>
+
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+<script>
+var margin = {top: 20, right: 20, bottom: 40, left: 60},
+    width = 1100 - margin.left - margin.right,
+    height = 800 - margin.top - margin.bottom;
+
+var hover_pad = 45;
+
+/*
+ * value accessor - returns the value to encode for a given data object.
+ * scale - maps value to a visual display encoding, such as a pixel position.
+ * map function - maps from data value to display value
+ * axis - sets up axis
+ */
+
+// setup x
+var  xValue = function(d) { return d["date"];}, // data -> value
+     xScale = d3.time.scale().range([0, width]), // value -> display
+     xMap = function(d) { return xScale(xValue(d));}, // data -> display
+     xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+// setup y
+var yValue = function(d) { return d["score"];}, // data -> value
+    yScale = d3.scale.linear().range([height, 0]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+// define date format
+var parsedate = d3.time.format("%Y-%m-%d").parse;
+var formatdate = d3.time.format("%b %d, %Y");
+
+// setup fill color
+var cValue = function(d) { return d.candidate;},
+    color = d3.scale.ordinal()
+      .domain(["Clinton", "Trump"])
+      .range(["#2980B9", "#C94740"]);
+
+// add the graph canvas to the body of the webpage
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Define the line
+var sentline = d3.svg.line()
+    .x(function(d) { return xScale(d.date); })
+    .y(function(d) { return yScale(d.score); })
+    .interpolate("cardinal");
+
+// load data
+d3.csv("{{ url_for('static', filename='sentiment.csv') }}", function(error, data) {
+
+  // change string (from CSV) into number format
+  data.forEach(function(d) {
+    d["date"] = parsedate(d["date"]);
+    d["score"] = +d["score"];
+    d["candidate"] = d["candidate"];
+    d["count"] = +d["count"];
+//    console.log(d);
+  });
+
+  // don't want dots overlapping axis, so add in buffer to data domain
+  xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+  yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Date")
+      .style("font-size", "14px")
+      .style("font-style", "italic");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .append("text")
+      .attr("class", "label")
+      // .attr("transform", "rotate(-90)")
+      .attr("y", 2)
+      .attr("x", 40)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Score")
+      .style("font-size", "14px")
+      .style("font-style", "italic");
+
+  // event markers
+  var basket = parsedate("2016-09-09");
+  var debate1=parsedate("2016-09-26");
+  var debate2=parsedate("2016-10-09");
+  var debate3=parsedate("2016-10-19");
+  var grope=parsedate("2016-10-07");
+  var fall=parsedate("2016-09-11");
+
+  // 9 September 2016: Clinton calls Trump supporters a 'basket of deplorables'
+  // 28 October 2016: FBI begins second investigation in Clinton emails
+  // 2 November 2016: Woman accuses Trump of child rape
+  // 6 November 2016: FBI clears Clinton of email scandal
+
+  svg.append("line")
+      .attr("x1", xScale(basket))
+      .attr("y1", yScale(-0.655))
+      .attr("x2", xScale(basket))
+      .attr("y2", yScale(0.54))
+      .style("stroke-width", 2)
+      .style("stroke", "#9FACB9")
+      .style("fill", "none");
+
+  svg.append("text")
+      .attr("x", xScale(basket))
+      .attr("y", yScale(0.56))
+      .attr("text-anchor", "middle")
+      //.style("font-size", "16px")
+      .text("Basket of Deplorables");
+
+  svg.append("line")
+      .attr("x1", xScale(debate1))
+      .attr("y1", yScale(-0.655))
+      .attr("x2", xScale(debate1))
+      .attr("y2", yScale(0.54))
+      .style("stroke-width", 2)
+      .style("stroke", "#9FACB9")
+      .style("fill", "none");
+
+  svg.append("text")
+      .attr("x", xScale(debate1))
+      .attr("y", yScale(0.56))
+      .attr("text-anchor", "middle")
+      //.style("font-size", "16px")
+      .text("First Debate");
+
+  svg.append("line")
+      .attr("x1", xScale(debate2))
+      .attr("y1", yScale(-0.655))
+      .attr("x2", xScale(debate2))
+      .attr("y2", yScale(0.54))
+      .style("stroke-width", 2)
+      .style("stroke", "#9FACB9")
+      .style("fill", "none");
+
+  svg.append("text")
+      .attr("x", xScale(debate2))
+      .attr("y", yScale(0.56))
+      .attr("text-anchor", "middle")
+      //.style("font-size", "16px")
+      .text("Second Debate");
+
+   svg.append("line")
+      .attr("x1", xScale(debate3))
+      .attr("y1", yScale(-0.655))
+      .attr("x2", xScale(debate3))
+      .attr("y2", yScale(0.54))
+      .style("stroke-width", 2)
+      .style("stroke", "#9FACB9")
+      .style("fill", "none");
+
+  svg.append("text")
+      .attr("x", xScale(debate3))
+      .attr("y", yScale(0.53))
+      .attr("text-anchor", "left")
+      //.style("font-size", "16px")
+      .text("Third Debate");
+
+  svg.append("line")
+      .attr("x1", xScale(fall))
+      .attr("y1", yScale(-0.655))
+      .attr("x2", xScale(fall))
+      .attr("y2", yScale(0.54))
+      .style("stroke-width", 2)
+      .style("stroke", "#9FACB9")
+      .style("fill", "none");
+
+  svg.append("text")
+      .attr("x", xScale(fall))
+      .attr("y", yScale(0.54))
+      .attr("text-anchor", "right")
+      //.style("font-size", "16px")
+      .text("Clinton Faints at 9/11");
+
+  // draw dots
+  svg.selectAll(".dot")
+      .data(data)
+      .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 3.5)
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .style("fill", function(d) { return color(cValue(d));})
+      .on("mouseover", function(d) {
+
+          // show the tool tip with the details of the node
+          var xPosition = parseFloat(d3.select(this).attr("cx"))+hover_pad;
+          var yPosition = parseFloat(d3.select(this).attr("cy"))+hover_pad;
+          d3.select("#tooltip")
+            .style("left",xPosition + "px")
+            .style("top",yPosition + "px")
+            .select("#node_candidate")
+            .text(d.candidate);
+
+          d3.select("#tooltip")
+            .select("#node_sentiment")
+            .text(d.score.toFixed(3));
+
+          d3.select("#tooltip")
+            .select("#node_source")
+            .text(d.source);
+
+          d3.select("#tooltip")
+            .select("#node_date")
+            .text(formatdate(d.date));
+
+          d3.select("#tooltip")
+            .select("#node_count")
+            .text(d.count.toFixed(0))
+
+          d3.select("#tooltip").classed("hidden",false);
+      })
+      .on("mouseout", function(d) {
+          d3.select("#tooltip").classed("hidden",true);
+      });
+
+  var dropDown = d3.select("#news-sources");
+  var dropDown2 = d3.select("#news-sources2");
+
+  dropDown2.on("change", function() {
+       var selected2 = this.value;
+
+        if(selected2 == 'None') {
+          var selected = $('#filter').find(":selected").text();
+
+            svg.selectAll(".line3")
+              .attr("visibility", "hidden");
+
+            svg.selectAll(".dot")
+              .attr("visibility", "hidden");
+
+            svg.selectAll(".dot")
+              .filter(function(d) { return selected == d.source; })
+              .attr("visibility", "visible");
+
+            $("select option").prop("disabled", false);
+            $("#filter").find("option[value='" + selected2 + "']").prop("disabled", true);
+            $("#filter2.hidden").find("option[value='" + selected + "']").prop("disabled", true);
+            }
+
+        else {
+          var selected = $('#filter').find(":selected").text();
+
+         //$("#filter").prop("disabled", false);
+         $("select option").prop("disabled", false);
+         $("#filter").find("option[value='" + selected2 + "']").prop("disabled", true);
+         $("#filter2.hidden").find("option[value='" + selected + "']").prop("disabled", true);
+
+         svg.selectAll(".dot")
+            .attr("visibility", "hidden");
+
+         svg.selectAll(".line3")
+            .attr("visibility", "hidden");
+
+           svg.selectAll(".dot")
+              .filter(function(d) { return selected == d.source; })
+              .attr("visibility", "visible");
+
+           svg.selectAll(".dot")
+              .filter(function(d) { return selected2 == d.source; })
+              .style("fill", "white")
+              .style("stroke", function(d) { return color(cValue(d));})
+              .attr("visibility", "visible");
+
+          data_selected = data.filter(function(row) {
+              return row['source'] == selected2;
+            });
+
+              //use original scale from scatter
+              xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+              yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
+
+              // Nest the entries by candidate
+              var dataNest = d3.nest()
+                  .key(function(d) {return d.candidate;})
+                  .entries(data_selected);
+
+              // Loop through each candidate / key and assign to line2 attribute
+              // which is different from the axis and trend line for all
+              dataNest.forEach(function(d) {
+
+                  svg.append("path")
+                      .attr("class", "line3")
+                      .attr("id", d.key+selected2.split('.')[0])
+                      .attr("d", sentline(d.values))
+                      .attr("visibility", function () {
+                        if($('#' + d.key + '_check').is(":checked")) {
+                          return "visible"
+                        }
+                        else { return "hidden"}  } )
+                      .style("stroke-dasharray", ("2, 6"))
+                      .style("stroke", function() { return d.color=color(d.key) });
+
+                });
+              }
+          });
+
+  dropDown.on("change", function() {
+       var selected = this.value;
+
+       svg.selectAll(".count")
+         .attr("visibility", "hidden");
+
+       //Summary count for Clinton
+       d3.csv("{{ url_for('static', filename='total_count.csv') }}", function(tot_count_all) {
+         var selected = $('#filter').find(":selected").text();
+         csv = tot_count_all.filter(function(row) {
+           return row['candidate'] == 'Clinton' && row['source'] == selected;
+         });
+
+           svg.append("text")
+               .attr("class", "count")
+               .attr("x", width + 20)
+               .attr("y", 10)
+               .attr("dy", ".35em")
+               .data(csv)
+               .style("text-anchor", "end")
+               .text(function(d) {return d.count;});
+       });
+
+       //Summary count for Trump
+       d3.csv("{{ url_for('static', filename='total_count.csv') }}", function(tot_count_all2) {
+         csv = tot_count_all2.filter(function(row) {
+           return row['candidate'] == 'Trump' && row['source'] == selected;
+         })
+
+         tot_count_all2.forEach(function(d) {
+           d.count2 = +d.count;
+           d.candidate2 = d.candidate;
+         });
+
+           svg.append("text")
+               .attr("class", "count")
+               .attr("x", width + 20)
+               .attr("y", 30)
+               .attr("dy", ".35em")
+               .data(csv)
+               .style("text-anchor", "end")
+               .text(function(d) {return d.count2;});
+       });
+
+       // make all dots visible if the user has selected "All"
+       if(selected == 'All'){
+         svg.selectAll(".dot")
+            .attr("visibility", "visible")
+            .style("fill", function(d) { return color(cValue(d)); })
+            .style("stroke", "black");
+
+          svg.selectAll(".line2")
+            .attr("visibility", "hidden");
+
+          svg.selectAll(".line3")
+            .attr("visibility", "hidden");
+
+          $("#filter2").val("None").change();
+          $('#filter2 option').prop('selected', function() { return this.defaultSelected; });
+          $("#filter2.hidden").css("visibility", "hidden");
+          $("select option").prop("disabled", false);
+          }
+
+       // make only the appropriate dot visible if the user has
+       // selected something else; first make all dots visible, then
+       // make all dots but the selected dot invisible
+       else {
+
+        svg.selectAll(".line2")
+          .attr("visibility", "hidden");
+
+        svg.selectAll(".dot")
+           .filter(function(d) { return selected == d.source; })
+           .attr("visibility", "visible");
+
+        $("#filter2.hidden").css("visibility", "visible");
+        $("select option").prop("disabled", false);
+        //$("#filter2.hidden").find("option[value='" + "Select" + "']").hide();
+        $("#filter2.hidden").find("option[value='" + selected + "']").prop("disabled", true);
+        var selected2 = $('#filter2 option:selected').val();
+        $("#filter").find("option[value='" + selected2 + "']").prop("disabled", true);
+
+        if (selected2 == "None") {
+          svg.selectAll(".dot")
+             .filter(function(d) {return selected != d.source;})
+             .attr("visibility", "hidden");
+          }
+          else {
+            svg.selectAll(".dot")
+               .filter(function(d) {return selected != d.source && selected2 != d.source ;})
+               .attr("visibility", "hidden");
+          }
+
+        data_selected = data.filter(function(row) {
+            return row['source'] == selected;
+          });
+
+            //use original scale from scatter
+            xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+            yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
+
+            // Nest the entries by candidate
+            var dataNest = d3.nest()
+                .key(function(d) {return d.candidate;})
+                .entries(data_selected);
+
+            // Loop through each candidate / key and assign to line2 attribute
+            // which is different from the axis and trend line for all
+            dataNest.forEach(function(d) {
+
+                svg.append("path")
+                    .attr("class", "line2")
+                    .attr("id", d.key + selected.split('.')[0])
+                    .attr("d", sentline(d.values))
+                    .attr("visibility", function () {
+                      if($('#' + d.key + '_check').is(":checked")) {
+                        return "visible"
+                      }
+                      else { return "hidden"}  } )
+                    .style("stroke-dasharray", ("7, 5"))
+                    .style("stroke", function() { return d.color=color(d.key) });
+
+                  });
+            };
+
+            //////////////////////
+            //
+            // HISTOGRAM CODE
+            //
+            //////////////////////
+
+            // set the maximum and minimum bins, we set this as a constant because
+            // there is a solid max and minimum to the sentiment scores
+            var minbin = -1.0;
+            var maxbin = 1.0;
+            var binsize = 0.1;
+            var numbins = (maxbin - minbin)/binsize;
+
+            // set the limits of the x-axis
+            var xmin = minbin - 0.1
+            var xmax = maxbin + 0.1
+
+            // whitespace on either side of the bars
+            var binmargin = .005;
+
+            var hist_width = width/2;
+            var hist_height = height/3;
+
+            // first remove any existing histograms
+            d3.selectAll('.histograms').remove();
+
+            //
+            // Clinton
+            //
+
+            // add the histogram for Clinton
+            // populate the list of values into an array for each candidate
+            $.ajax({
+                  type: "GET",
+                  url: "hist_data",
+                  dataType: "text",
+                  data: {
+                      person: "Clinton",
+                      website: $('#news-sources').val()
+                  },
+                  success:  function(data) {
+                              // load in the data
+                              var values = [];
+
+                              // add the data values to the histogram data
+                              data = JSON.parse(data)["data"]
+                              data.forEach(function(d) {
+                                values.push(+d.sum);
+                                });
+
+                              // add the data to the histogram data
+                              var histdata = new Array(numbins);
+                              for (var i=0; i<numbins; i++) {
+                                histdata[i] = {numfill:values[i]};
+                              }
+
+                              // x-scale for the width of the bins
+                              var x = d3.scale.linear()
+                                        .domain([0,(xmax-xmin)])
+                                        .range([0,hist_width]);
+
+                              // x-scale for the placement of the placement of the bars
+                              var x2 = d3.scale.linear()
+                                        .domain([xmin,xmax])
+                                        .range([0,hist_width]);
+
+                              // scale for the height of the bars
+                              var y = d3.scale.linear()
+                                        .domain([0,d3.max(histdata,function(d){return d.numfill;})])
+                                        .range([hist_height,0]);
+
+                              // create the x-axis
+                              var xAxis = d3.svg.axis()
+                                            .scale(x2)
+                                            .orient("bottom");
+
+                              // create the y-axis
+                              var yAxis = d3.svg.axis()
+                                            .scale(y)
+                                            .ticks(8)
+                                            .orient("left");
+
+                              // append the svg canvas to the end of the body
+                              var svg = d3.select("body").append("svg")
+                                          .attr("class","histograms")
+                                          .attr("width", hist_width + margin.left + margin.right)
+                                          .attr("height", hist_height + margin.top + margin.bottom) // add 275 when rotating
+                                          .append("g")
+                                          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                              // set up the bars
+                              var bar = svg.selectAll(".bar")
+                                          .data(histdata)
+                                          .enter().append("g")
+                                          .attr("class","bar")
+                                          .attr("transform", function(d, i) {
+                                                // for each catching, console logging
+                                                // console.log(d);
+                                                // console.log("i",i);
+                                                // console.log("i*binsize+minbin",i * binsize + minbin)
+                                                // console.log("x2",x2(i * binsize + minbin))
+                                                // console.log(d.numfill);
+                                                // console.log(y(d.numfill));
+                                                return "translate(" + x2(i * binsize + minbin) + "," + y(d.numfill) + ")"; });
+
+                              // add rectangles of the correct size for each bar
+                              bar.append("rect")
+                                .attr("x", x(binmargin))
+                                .attr("fill","#2980B9")
+                                .attr("width", x(binsize - 2 * binmargin))
+                                .attr("height", function(d) {
+                                  // for debugging, console logging
+                                  //  console.log("binsize",binsize);
+                                  //  console.log("binmargin",binmargin);
+                                  //  console.log("summation",binsize - 2 * binmargin)
+                                  return hist_height - y(d.numfill);
+                                });
+
+                              // add the x-axis
+                              svg.append("g")
+                                .attr("class","x axis")
+                                .attr("transform", "translate(0," + hist_height + ")")
+                                .call(xAxis);
+
+                              // add the x-axis label
+                              svg.append("text")
+                                .attr("class","x label")
+                                .attr("text-anchor", "middle")
+                                .attr("x", hist_width/2)
+                                .attr("y", hist_height + margin.bottom-2)
+                                .text("Clinton Sentiment Distribution")
+
+                              // add the y-axis
+                              svg.append("g")
+                                .attr("class", "y axis")
+                                .attr("transform", "translate(0,0)")
+                                .call(yAxis);
+
+                              // add the y-axis label
+                              svg.append("text")
+                                .attr("class","x label")
+                                .attr("text-anchor", "left")
+                                .attr("x", margin.left)
+                                .attr("y", -10)
+                                .text("Count of " + $('#news-sources').val())
+                                .style("font-weight", "bold")
+                                .style("font-size", 14);
+
+                              // rotate the histogram
+                              // svg.attr("transform","rotate(90 0 500) scale(-1,1)");
+
+                                }
+                            });
+
+            // add the histogram for Trump
+            // populate the list of values into an array for each candidate
+            $.ajax({
+                  type: "GET",
+                  url: "hist_data",
+                  dataType: "text",
+                  data: {
+                      person: "Trump",
+                      website: $('#news-sources').val()
+                  },
+                  success: function(data) {
+                              // load in the data
+                              var values = [];
+
+                              // add the data values to the histogram data
+                              data = JSON.parse(data)["data"]
+                              data.forEach(function(d) {
+                                values.push(+d.sum);
+                                });
+
+                              // add the data to the histogram data
+                              var histdata = new Array(numbins);
+                              for (var i=0; i<numbins; i++) {
+                                histdata[i] = {numfill:values[i]};
+                              }
+
+                              // x-scale for the width of the bins
+                              var x = d3.scale.linear()
+                                        .domain([0,(xmax-xmin)])
+                                        .range([0,hist_width]);
+
+                              // x-scale for the placement of the placement of the bars
+                              var x2 = d3.scale.linear()
+                                        .domain([xmin,xmax])
+                                        .range([0,hist_width]);
+
+                              // scale for the height of the bars
+                              var y = d3.scale.linear()
+                                        .domain([0,d3.max(histdata,function(d){return d.numfill;})])
+                                        .range([hist_height,0]);
+
+                              // create the x-axis
+                              var xAxis = d3.svg.axis()
+                                            .scale(x2)
+                                            .orient("bottom");
+
+                              // create the y-axis
+                              var yAxis = d3.svg.axis()
+                                            .scale(y)
+                                            .ticks(8)
+                                            .orient("left");
+
+                              // append the svg canvas to the end of the body
+                              var svg = d3.select("body").append("svg")
+                                          .attr("class","histograms")
+                                          .attr("width", hist_width + margin.left + margin.right)
+                                          .attr("height", hist_height + margin.top + margin.bottom)
+                                          .append("g")
+                                          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                              // set up the bars
+                              var bar = svg.selectAll(".bar")
+                                          .data(histdata)
+                                          .enter().append("g")
+                                          .attr("class","bar")
+                                          .attr("transform", function(d, i) {
+                                                // for each catching, console logging
+                                                // console.log(d);
+                                                // console.log("i",i);
+                                                // console.log("i*binsize+minbin",i * binsize + minbin)
+                                                // console.log("x2",x2(i * binsize + minbin))
+                                                // console.log(d.numfill);
+                                                // console.log(y(d.numfill));
+                                                return "translate(" + x2(i * binsize + minbin) + "," + y(d.numfill) + ")"; });
+
+                              // add rectangles of the correct size for each bar
+                              bar.append("rect")
+                                .attr("x", x(binmargin))
+                                .attr("fill","#C94740")
+                                .attr("width", x(binsize - 2 * binmargin))
+                                .attr("height", function(d) {
+                                  // for debugging, console logging
+                                  //  console.log("binsize",binsize);
+                                  //  console.log("binmargin",binmargin);
+                                  //  console.log("summation",binsize - 2 * binmargin)
+                                  return hist_height - y(d.numfill);
+                                });
+
+                              // add the x-axis
+                              svg.append("g")
+                                .attr("class","x axis")
+                                .attr("transform", "translate(0," + hist_height + ")")
+                                .call(xAxis);
+
+                              // add the x-axis label
+                              svg.append("text")
+                                .attr("class","x label")
+                                .attr("text-anchor", "middle")
+                                .attr("x", hist_width/2)
+                                .attr("y", hist_height + margin.bottom-2)
+                                .text("Trump Sentiment Distribution")
+
+                              // add the y-axis label
+                              svg.append("text")
+                                .attr("class","x label")
+                                .attr("text-anchor", "left")
+                                .attr("x", margin.left)
+                                .attr("y",-10)
+                                .text("Count of " + $('#news-sources').val())
+                                .style("font-weight", "bold")
+                                .style("font-size", 14);
+
+                              // add the y-axis
+                              svg.append("g")
+                                .attr("class", "y axis")
+                                .attr("transform", "translate(0,0)")
+                                .call(yAxis);
+
+                              }
+            });
+  })
+
+
+  // draw legend
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+      .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  // draw legend colored rectangles
+  legend.append("rect")
+      .attr("x", width - 36)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  // draw legend text
+  legend.append("text")
+      .attr("x", width - 42)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d;})
+
+  // draw legend for dotted and solid line
+  svg.append("line")
+    .attr("x1", width - 72)
+    .attr("x2", width - 56)
+    .attr("y1", 48)
+    .attr("y2", 48)
+    .style("stroke-dasharray","3,3")
+    .style("stroke", "black");
+
+  svg.append("text")
+    .attr("x", width + 20)
+    .attr("y", -6)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text("Count");
+
+  svg.append("text")
+    .attr("x", width + 20)
+    .attr("y", -16)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text("Article");
+
+  svg.append("line")
+    .attr("x1", width - 72)
+    .attr("x2", width - 56)
+    .attr("y1", 63)
+    .attr("y2", 63)
+    .style("stroke","3,3")
+    .style("stroke", "black");
+
+  svg.append("text")
+      .attr("x", width + 20)
+      .attr("y", 48)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text("Selected news");
+
+  svg.append("text")
+      .attr("x", width + 20)
+      .attr("y", 63)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text("All news");
+
+      //Summary count for Clinton
+  d3.csv("{{ url_for('static', filename='total_count.csv') }}", function(tot_count_all) {
+    var selected = $('#filter').find(":selected").text();
+    csv = tot_count_all.filter(function(row) {
+      return row['candidate'] == 'Clinton' && row['source'] == selected;
+    });
+
+      svg.append("text")
+          .attr("class", "count")
+          .attr("x", width + 20)
+          .attr("y", 10)
+          .attr("dy", ".35em")
+          .data(csv)
+          .style("text-anchor", "end")
+          .text(function(d) {return d.count;});
+  });
+
+  //Summary count for Trump
+  d3.csv("{{ url_for('static', filename='total_count.csv') }}", function(tot_count_all2) {
+    var selected = $('#filter').find(":selected").text();
+    csv = tot_count_all2.filter(function(row) {
+      return row['candidate'] == 'Trump' && row['source'] == selected;
+    })
+
+    tot_count_all2.forEach(function(d) {
+      d.count2 = +d.count;
+      d.candidate2 = d.candidate;
+    });
+
+      svg.append("text")
+          .attr("class", "count")
+          .attr("x", width + 20)
+          .attr("y", 30)
+          .attr("dy", ".35em")
+          .data(csv)
+          .style("text-anchor", "end")
+          .text(function(d) {return d.count2;});
+  });
+
+  d3.csv("{{ url_for('static', filename='avg_sentiment.csv') }}", function(data_avg) {
+    data_avg.forEach(function(d) {
+      d.date = parsedate(d.date);
+      d.score = +d.score;
+      d.candidate = d.candidate;
+    });
+
+      //use original scale from scatter
+      xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+      yScale.domain([d3.min(data, yValue), d3.max(data, yValue)]);
+
+      // Nest the entries by candidate
+      var dataNest = d3.nest()
+          .key(function(d) {return d.candidate;})
+          .entries(data_avg);
+
+      // Loop through each candidate / key
+      dataNest.forEach(function(d) {
+
+          svg.append("path")
+              .attr("class", "line")
+              .attr("id", d.key)
+              .attr("d", sentline(d.values))
+              .style("stroke", function() { return d.color=color(d.key) });
+
+      });
+  });
+
+  d3.selectAll("input[name=candidate]").on("change", function() {
+    var selected_candidate = this.value;
+    display = this.checked ? "inline" : "none";
+    display_line = this.checked ? "visible" : "hidden";
+
+    var selected = $('#filter').find(":selected").val();
+    var selected2 = $('#filter2 option:selected').val();
+
+    svg.selectAll(".dot")
+      .filter(function(d) { return selected_candidate == d.candidate })
+      .attr("display", display);
+
+    var select1 = selected_candidate + selected.split('.')[0];
+    var select2 = selected_candidate + selected2.split('.')[0];
+
+    d3.selectAll("#" + select1)
+      .attr("visibility", display_line);
+    d3.selectAll("#"+ select2)
+      .attr("visibility", display_line);
+
+  });
+
+  d3.selectAll("input[name=Average_Trend]").on("change", function() {
+    display = this.checked ? "inline" : "none";
+
+    svg.selectAll(".line")
+       .attr("display", display);
+  });
+})
+
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 a02b8663262f84c715f3d0571761c71e0c783cef Jacky Zhang <jakzhang@ucdavis.edu> 1498328603 -0700	clone: from https://github.com/JasonSanchez/machine-learning-for-all
+a02b8663262f84c715f3d0571761c71e0c783cef 106b7ab79a085410e3c5f4c8b62345909b85e187 Jacky Zhang <jakzhang@ucdavis.edu> 1498337780 -0700	commit: Jacky flask server code
+106b7ab79a085410e3c5f4c8b62345909b85e187 72739c5fc5dd82846bc86b718f7c5c360d44fb6f Jacky Zhang <jakzhang@ucdavis.edu> 1498348517 -0700	commit: Add download capability
+72739c5fc5dd82846bc86b718f7c5c360d44fb6f ece5e4a2f493b641fb4d8986b7b275d70841967a Jacky Zhang <jakzhang@ucdavis.edu> 1499305246 -0700	commit: v1 complete

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Pretty JSON output -->
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+<style>
+
+
+#NavBar {
+  font-size: 12pt;
+  font-family: "Open Sans Condensed";
+  color: #FFFFFF;
+	background-color: #a2bff4;
+  /*background-color: rgba(72,74,74,0.8);*/
+  letter-spacing: 1px;
+
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+#NavLeft {
+  display: inline-block;
+  float: left;
+}
+
+#NavRight {
+  display: inline-block;
+  float: right;
+}
+
+#NavBar a {
+  text-decoration: none;
+  padding-left: 0;
+  padding-right: 50px;
+}
+
+#introImage {
+  font-size: 50pt;
+  font-family: "Open Sans Condensed";
+  background-image: url(static/background.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  padding-top: 300px;
+  padding-bottom: 300px;
+}
+
+#title {
+  color: #FFFFFF;
+  text-align: left;
+  margin-left: 125px;
+  margin-right: 125px;
+  background-color: rgba(0,0,0,0.1);
+}
+
+.heading {
+  font-family: "Open Sans Condensed";
+  font-size: 25pt;
+  text-align: center;
+  font-weight: bold;
+}
+
+#js-train-files {
+  font-family: "Open Sans Condensed";
+  font-size: 12pt;
+}
+
+#js-test-files {
+  font-family: "Open Sans Condensed";
+  font-size: 12pt;
+}
+
+#Section1 {
+  background-color: #FFFFFF;
+  color: #A9A9A9;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 45px;
+  padding-bottom: 20px;
+}
+
+#Section2 {
+  background-color: #A9A9A9;
+  color: #FFFFFF;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 15px;
+  padding-bottom: 20px;
+}
+
+#Section3 {
+  background-color: #FFFFFF;
+  color: #A9A9A9;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 15px;
+  padding-bottom: 20px;
+}
+
+iframe
+{
+  border: none;
+  width: 100%;
+  height: 550px
+}
+
+
+body {
+  margin:0;
+  font-family: "Open Sans Condensed","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 16pt;
+  text-align: justify;
+}
+
+body a {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.theme {background-color:#A2BFF4}
+
+.centered {
+  text-align: center;
+}
+
+</style>
+
+<head>
+  <title>Application</title>
+  <link rel="stylesheet" href="/static/test.css" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One|Open+Sans+Condensed:300" rel="stylesheet">
+</head>
+
+<body>
+
+  <div id="NavBar">
+			<a target="_blank">Machine Learning for All</a>
+    <div id="NavRight">
+			<a href="http://localhost:5000/index" target="_blank">Prediction Engine</a>
+			<a href="http://localhost:5000/method" target="_blank">Tutorials and Methods</a>
+    </div>
+  </div>
+
+  <div id="top"></div>
+
+  <!-- <div id="introImage">
+  </div> -->
+
+  <div id="Section1">
+    <p class="heading">Upload Files</p>
+
+  <div class="container", id="input_window">
+      <div class="panel panel-default">
+        <div class="panel-body">
+
+          <!-- Standard Form -->
+          <form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
+            <div class="form-inline">
+              <h4>File containing the column you want to predict</h4>
+              <div class="form-group">
+                <input type="file" name="train" id="js-train-files" required>
+              </div>
+							<h5>&nbsp;</h5>
+              <h4>File without the column you want to predict</h4>
+              <div class="form-group">
+                <input type="file" name="test" id="js-test-files" required>
+              </div>
+							<h5>&nbsp;</h5>
+							<div class="text-center">
+	              <button type="submit" class="btn btn-lg btn-primary theme" id="js-upload-submit" style="display:inline;">Upload files and predict</button>
+						  </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div> <!-- /container -->
+
+  <script>
+
+  + function($) {
+    'use strict';
+
+    // UPLOAD CLASS DEFINITION
+    // ======================
+
+    var dropZone = document.getElementById('drop-zone');
+    var uploadForm = document.getElementById('js-upload-form');
+		var hash_train = "train";
+		var hash_test = "test";
+
+    var startUpload = function(train, test) {
+        console.log(train, test);
+        var formData = new FormData();
+        for (var i = 0; i < train.length; i++) {
+          var file = train[i];
+          formData.append("train", file, file.name);
+        }
+
+        for (var i = 0; i < test.length; i++) {
+          var file = test[i];
+          formData.append("test", file, file.name);
+        }
+
+        console.log(formData);
+
+        fetch('/dataset', {
+          method: 'POST',
+          body: formData
+        }).then(function(data) {
+          data.json().then(function(hashval) {
+
+						//Remove old iframe if it is there
+						var currentIframes = document.getElementById("Section2").getElementsByTagName("iframe");
+						if(currentIframes.length >= 1){
+								currentIframes[0].remove();
+						}
+
+						// Remove old performance html if it is there
+						var currentPerformance = document.getElementById("js-performance").getElementsByTagName("div");
+						if(currentPerformance.length >= 1){
+								currentPerformance[0].remove();
+						}
+
+						// Hide output panel
+						document.getElementById('Section3').style.display = "none";
+						// Display iframe with Shiny app
+						fetch('/shiny', {
+							method: 'GET'
+						}).then(function(showShiny) {
+							var iframe = document.createElement('iframe');
+							iframe.style.display = "inline";
+							iframe.src = "http://127.0.0.1:2326";
+							//Append new iframe
+							document.getElementById('Section2').style.display = "block";
+							document.getElementById("Section2").appendChild(iframe);
+						})
+
+						// Run prediction
+						fetch('/predict/' + hashval.hash_train + '_' +  hashval.hash_test, {
+							method: 'GET'
+		        }).then(function(data) {
+		          data.json().then(function(response) {
+		            document.getElementById("js-download").href = "http://0.0.0.0:5000/download/" + response.fileid;
+		            var performance = document.createElement('div');
+		            performance.innerHTML = response.performance;
+
+		            document.getElementById("js-performance").appendChild(performance);
+		          });
+		          //Show output buttons only when model is done running
+		          document.getElementById('Section3').style.display = "block";
+		        })
+
+
+        	})
+				})
+
+				// //Remove old iframe if it is there
+				// var currentIframes = document.getElementById("Section2").getElementsByTagName("iframe");
+				// if(currentIframes.length >= 1){
+				// 		currentIframes[0].remove();
+				// }
+				//
+				// // Display iframe with Shiny app
+				// fetch('/shiny', {
+				// 	method: 'GET'
+        // }).then(function(showShiny) {
+				// 	var iframe = document.createElement('iframe');
+        //   iframe.style.display = "inline";
+        //   iframe.src = "http://127.0.0.1:2326";
+        //   //Append new iframe
+				// 	document.getElementById('Section2').style.display = "block";
+        //   document.getElementById("Section2").appendChild(iframe);
+        // })
+
+				// // Run prediction
+				// fetch('/prediction', {
+				// 	method: 'GET'
+        // }).then(function(data) {
+        //   // gets the id for the files
+        //   data.json().then(function(response) {
+        //     document.getElementById("js-download").href = "http://0.0.0.0:5000/download/" + response.hashid;
+        //     var performance = document.createElement('div');
+        //     performance.innerHTML = response.performance;
+				//
+				// 		//Remove old performance html if it is there
+				// 		var currentPerformance = document.getElementById("js-performance").getElementsByTagName("div");
+				// 		console.log(currentPerformance.length)
+				// 		if(currentPerformance.length >= 1){
+				// 				currentPerformance[0].remove();
+				// 		}
+				//
+        //     document.getElementById("js-performance").appendChild(performance);
+        //   });
+        //   //Show output buttons only when model is done running
+        //   document.getElementById('Section3').style.display = "block";
+        // })
+
+    }
+
+
+    uploadForm.addEventListener('submit', function(e) {
+        var trainFiles = document.getElementById('js-train-files').files;
+        var testFiles = document.getElementById('js-test-files').files;
+        e.preventDefault()
+
+        startUpload(trainFiles, testFiles);
+    })
+
+  }(jQuery);
+  </script>
+  </div>
+
+  <div id="Section2" style="display:none;">
+    <p class="heading">Explore the Data</p>
+    <p>
+    </p>
+  </div>
+
+  <div id="Section3" style="display:none;">
+    <p class="heading">Download Predictions</p>
+      <div class="container" id="output">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div id="js-performance">
+              </div>
+              <h2></h2>
+							<div class="text-center">
+              <a href="http://0.0.0.0:5000/download" id="js-download" style="display:inline;">
+                <button type="download" class="btn btn-lg btn-primary theme" >Download predictions!</button>
+              </a>
+						</div>
+            </div>
+          </div>
+      </div>
+  </div>
+
+</body>
+
+</html>

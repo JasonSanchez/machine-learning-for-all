@@ -1,0 +1,38 @@
+/*body {
+    font-family: "Arial", sans-serif;
+}
+
+.dropzone {
+    width:300px;
+    height:300px;
+    border:2px dashed #ccc;
+    color:#ccc;
+    line-height:300px;
+    text-align: center;
+}
+
+.dropzone.dragover {
+    border-color:#000;
+    color:#000;
+}*/
+
+.theme {background-color:#A2BFF4;}
+
+.upload-drop-zone {
+  height: 200px;
+  border-width: 2px;
+  margin-bottom: 20px;
+}
+
+/* skin.css Style*/
+.upload-drop-zone {
+  color: #ccc;
+  border-style: dashed;
+  border-color: #ccc;
+  line-height: 200px;
+  text-align: center
+}
+.upload-drop-zone.drop {
+  color: #222;
+  border-color: #222;
+}
